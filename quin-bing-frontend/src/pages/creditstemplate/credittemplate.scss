@@ -1,0 +1,70 @@
+.radio-btn-div{
+  margin-left: 160px;
+}
+.radio-btnname{
+    display: inline-flex;
+    align-items: center;
+}
+
+.credithistorycontainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.paddedspan {
+  margin-left: 10px;
+}
+
+.userDropdown {
+    font-size: 16px;
+    width: 200px; 
+  }
+  
+  .option {
+    padding: 8px;
+    font-size: 16px;
+  }
+  
+  .userDropdown:focus {
+    outline: none;
+    border-color: #007bff; /* Adjust the color as needed */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Adjust the shadow as needed */
+  }
+
+  .transaction-history-header {
+    display: flex;
+    justify-content: space-between;
+    .left-header {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+  }
+  
+  .basic-single {
+    margin-left: 10px;
+  }
+
+  .multi-select {
+    width: 180px;
+    .dropdown-container {
+      .dropdown-heading {
+        cursor: pointer !important;
+        .spinner {
+          width: 70%;
+        }
+      }
+    }
+    .dropdown-container[aria-disabled="true"] {
+      background: #eee;
+      .dropdown-heading{
+        cursor: default !important;
+      }
+    }
+    input[type="checkbox"] {
+      display: none;
+    }
+  }
+
+
+  

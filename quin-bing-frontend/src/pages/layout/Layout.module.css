@@ -1,0 +1,131 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  background-image: linear-gradient(63deg, #ed414d 0%, #796eaf 100%) !important;
+  color: #f2f2f2;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  /* justify-content: space-around; */
+  margin-right: 12px;
+  margin-left: 12px;
+  width: 70%;
+}
+
+.headerTitleContainer {
+  display: flex;
+  align-items: center;
+  margin-right: 40px;
+  color: #f2f2f2;
+  text-decoration: none;
+  width: 200px;
+}
+
+.headerLogo {
+  height: 40px;
+}
+
+.headerTitle {
+  margin: 0;
+  margin-left: 12px;
+  font-weight: 600;
+  font-size: 1.17rem;
+}
+
+.headerNavList {
+  margin: 0;
+  display: flex;
+  list-style: none;
+  padding-left: 0;
+  align-items: center;
+}
+
+.headerNavPageLink {
+  color: #f2f2f2;
+  text-decoration: none;
+  opacity: 0.75;
+
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 500ms;
+  transition-property: opacity;
+}
+
+.headerNavPageLink:hover {
+  opacity: 1;
+}
+
+.headerNavPageLinkActive {
+  color: #f2f2f2;
+  text-decoration: none;
+}
+
+.headerNavLeftMargin {
+  margin-left: 40px;
+}
+
+.headerRightText {
+  margin: 0;
+  font-weight: normal;
+  margin-left: 40px;
+  font-size: 1rem;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  padding: 10px 30px;
+  background-image: linear-gradient(63deg, #ed414d 0%, #796eaf 100%) !important;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.powered{
+  text-align: right;
+}
+
+.footertext {
+  font-size: 10px;
+  text-align: left;
+  font-weight: bold;
+  color: #909090;
+  margin-right: 10px;
+
+}
+
+.footerlink{
+  text-decoration: none;
+  font-size: 10px;
+  text-align: left;
+  font-weight: bold;
+  color: #909090;
+}
+
+.footerlogopos {
+  width: auto;
+  height: 15px;
+  margin-right: 5px;
+}
+
+.copy_right {
+  font-size: 10px;
+  color: #909090;
+  font-weight: bold;
+}
+
+
+

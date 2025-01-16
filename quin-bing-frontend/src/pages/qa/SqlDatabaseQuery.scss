@@ -1,0 +1,16 @@
+.sql-database-query {
+    background-color: antiquewhite;
+    height: 100vh;
+    padding: 50px;
+    .tables {
+        display: flex;
+        justify-content: flex-start;
+    }
+    .table-name {
+        background: #fff;
+        border: 2px solid black;
+        border-radius: 6px;
+        width: 150px;
+        padding: 3px 5px;
+    }
+}

@@ -1,0 +1,124 @@
+.azure-sql {
+    display: flex;
+    .select-table-with-csv {
+        max-width: 75vw;
+        display: flex;
+        flex-direction: column;
+    }
+    .react-bootstrap-table {
+        border-radius: 0 !important;
+        max-width: 50vw;
+        max-height: 200px !important;
+        overflow: auto;
+        table {
+            margin-bottom: 0 !important;
+            bottom: 0 !important;
+        }
+        th, td {
+            padding: 10px 10px !important;
+            border: 1px solid lavender;
+        }
+        th {
+            font-size: 12px !important;
+            border-radius: 0 !important;
+        }
+        td {
+            font-size: 11px !important;
+        }
+        &::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: lavender !important;
+        }
+    }
+
+    .table-header-fixed th {
+        position: sticky;
+        top: -1px;
+        z-index: 1;
+        color: #3c59ff !important; 
+        background-color: lavender !important; /* Customize the background color if needed */
+    }
+
+    .select-table-with-csv {
+        width: 75vw;
+        padding: 20px;
+        .csv-column {
+            margin-right: 20px;
+            max-width: 15vw;
+        }
+        
+        .csv-data {
+            .react-bootstrap-table {
+                max-width: 54vw;
+                over-flow: auto !important;
+            }
+        }
+    }
+
+    .database-table-csv {
+        width: 100vw;
+        padding: 10px;
+        .csv-column {
+            margin-right: 20px;
+            max-width: 15vw;
+        }
+        
+        .csv-data {
+            .react-bootstrap-table {
+                max-width: 80vw;
+                over-flow: auto !important;
+            }
+        }
+    }
+
+    .select-table-with-csv, .database-table-csv {
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .dropdown-content {
+        z-index: 100 !important;
+    }
+
+    .collapse-button {
+        width: max-content;
+        border: 2px solid#5F7CC9 !important;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 14px;
+        background: #5F7CC9;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        margin-bottom: 10px;
+        margin-right: 20px;
+    }
+
+    .load-files {
+        margin-top: 10px;
+        border: 2px solid#5F7CC9 !important;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 14px;
+        background: #5F7CC9;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        margin-bottom: 10px;
+        &:disabled {
+            background: gray;
+            border-color: gray !important;
+        }
+    }
+
+    .load-view {
+        .rmsc .mult-select {
+            margin-left: 10px;
+        }
+    }
+}
