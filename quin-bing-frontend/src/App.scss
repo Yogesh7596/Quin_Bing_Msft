@@ -22,10 +22,15 @@
   }
   
   
-  body {
+  html, body {
     background-color: $PrimaryBackground !important;
-    height: 100vh;
+    height: 100%;
    
+  }
+
+  a {
+    font-weight: 500;
+    font-size: 18px;
   }
 
   .sr-only {
@@ -42,8 +47,7 @@
   
   input:focus, select:focus, #search-bar-0:focus, textarea:focus {
     outline: none !important;
-    box-shadow: 0 0 0 2px $SecondaryTransparentColor !important;
-    border-color: #fff !important;
+    border-color: #fff;
   }
   
   input[type="radio"] {
@@ -383,11 +387,11 @@
   
     thead {
       th {
-        background-color: $TableHeader !important;
+        background-color: $TableHeader;
         border-bottom: 2px solid rgba(0, 0, 0, 0.3);
         color: #262135 !important;
         font-weight: 800;
-        padding: 22px !important;
+        padding: 22px;
         font: normal normal bold 12px/14px Helvetica,sans-serif !important;
         letter-spacing: 0px !important;
       }
@@ -398,9 +402,9 @@
         td {
           letter-spacing: 0px !important;
           color: #262135 !important;
-          padding: 8px 0px 8px 25px !important;
+          padding: 8px 0px 8px 25px;
           font-size: 13px !important;
-          padding: 0.75rem 0.5rem 0.75rem 1.4rem !important
+          padding: 0.75rem 0.5rem 0.75rem 1.4rem
         }
   
         td.actions-column {

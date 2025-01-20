@@ -60,18 +60,44 @@ async def get_table_names():
 @app.post("/get_table_schema")
 async def get_table_schema(request: Request):
     data = {}
+    tables_data = {}  
     try:
         body_data = await request.json()
         tables = body_data.get("tables")
         if tables:
-            data = quin_obj.load_schemas(tables)
+            response = quin_obj.load_schemas(tables)
+            data = response["data"]
+            tables_data = response["tables_data"]
         else:
             return {"data": {}, "message": "Invalid tables list input"}
     except Exception as e:
         print(
             'Something went wrong\n', e)
         return {"data": {}, "message": f'Internal Server Error: {e}'}
-    return {"data": data}
+    return {"data": data, "tables_data": tables_data}
+
+@app.get("/get_tables_data")
+async def get_data(database: str = None, tables: str=None):
+    tables_list = tables.split(',') if tables else []
+    connection_string = config_data.get('odbc_connection_string', '')
+    #connection_string = os.getenv('connection_string')
+    conn = odbc.connect(connection_string)
+    cursor = conn.cursor()
+
+    try:
+        data_dict = {}
+        for table in tables_list:
+            # Assuming table names are valid SQL identifiers (no injection risk)
+            query = f"SELECT TOP 10 * FROM {table} ORDER BY newid();"
+            query_result = cursor.execute(query)
+            data = query_result.fetchall()
+            data = [dict(zip([column[0] for column in cursor.description], row)) for row in data]
+            data_dict[table] = data
+
+        return {"data": data_dict}
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.post("/generate_insights")
 async def generate_insights(request: Request):
@@ -82,7 +108,7 @@ async def generate_insights(request: Request):
         explain_code = data.get("explain_code")
         show_code = data.get("show_code")
         if user_query:
-            return StreamingResponse(content=quin_obj.sql_query_generation(user_query, is_plot, explain_code,show_code), media_type="text/event-stream")
+            return StreamingResponse(content=quin_obj.forecast_memo_query(user_query), media_type="text/event-stream")
         else:
             return {"data": {}, "message": "Invalid user_query input"}
     except Exception as e:

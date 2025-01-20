@@ -62,8 +62,8 @@ const Layout = ({ isAdmin, signOutClickHandler }) => {
                 </NavLink>
               </li>
               <li className={styles.headerNavLeftMargin}>
-                <NavLink to="azure_sql_database" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                  Azure SQL Database
+                <NavLink to="forecast_memos" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
+                  Forecast Memos
                 </NavLink>
               </li>
               {/* {isAdmin && <li className={styles.headerNavLeftMargin}>

@@ -65,11 +65,19 @@ class Quin:
     
     def load_schemas(self, selected_tables):
         data_dict = {}
+        tables_data = {}
+        conn = odbc.connect(connection_string)
+        cursor = conn.cursor()
         pre_prompt = '''SQL tables with their properties and sample data:'''
         for table_idx, table in enumerate(selected_tables):
             table_query = f'SELECT column_name AS "column_name", data_type FROM INFORMATION_SCHEMA.COLUMNS WHERE LOWER(table_name) = LOWER(\'{table}\')'
             column_df = pd.read_sql(table_query, conn)
             five_rows_query = f'select top 5 * from {table}'
+            query_result = cursor.execute(five_rows_query)
+            show_all_rows_query = cursor.execute(f'select * from {table}')
+            data = show_all_rows_query.fetchall()
+            data = [dict(zip([column[0] for column in cursor.description], row)) for row in data]
+            tables_data[table] = data
             dataframe_five_rows = pd.read_sql(five_rows_query, conn)
 
             each_table = f"""
@@ -111,7 +119,9 @@ class Quin:
 
         print("Pre-prompt", pre_prompt)
         self.pre_prompt = pre_prompt
-        return {"data": data_dict}
+        print("data dict", data_dict)
+        print("tables_data", tables_data)
+        return {"data": data_dict, "tables_data": tables_data}
     
     def prompt(self, user_query):
 
@@ -284,19 +294,19 @@ class Quin:
                 break
         
         time_taken_for_sql_query = round(sql_end - sql_start,2)
-        data = {"time_taken_for_sql_query": str(time_taken_for_sql_query)}
-        yield f"data: {json.dumps(data)}\n\n"
+        # data = {"time_taken_for_sql_query": str(time_taken_for_sql_query)}
+        # yield f"data: {json.dumps(data)}\n\n"
         time_taken_for_sql_execution = round(sql_run_end - sql_run_start,2)
-        data = {"time_taken_for_sql_execution": str(time_taken_for_sql_execution)}
-        yield f"data: {json.dumps(data)}\n\n"
+        # data = {"time_taken_for_sql_execution": str(time_taken_for_sql_execution)}
+        # yield f"data: {json.dumps(data)}\n\n"
 
         insight, code, time_taken_for_insights = pp.python_plot(insight_name, insight_df, user_query, plot)
         data = {"python_code": code}
         yield f"data: {json.dumps(data)}\n\n"        
         data = {"summary": insight}
         yield f"data: {json.dumps(data)}\n\n"
-        data = {"time_taken_for_insights": str(time_taken_for_insights)}
-        yield f"data: {json.dumps(data)}\n\n"
+        # data = {"time_taken_for_insights": str(time_taken_for_insights)}
+        # yield f"data: {json.dumps(data)}\n\n"
         if plot:
             base64_plot = pp.plot_to_base64(code)
             data = {"plot": base64_plot}
@@ -338,10 +348,712 @@ class Quin:
         data = {"sql_explanation": explained_sql_code}
         yield f"data: {json.dumps(data)}\n\n"
         data = {"python_explanation": explained_python_code}
-        yield f"data: {json.dumps(data)}\n\n"
-        data = {"time_taken_for_explain": str(time_taken_for_explain)}
+        # yield f"data: {json.dumps(data)}\n\n"
+        # data = {"time_taken_for_explain": str(time_taken_for_explain)}
         yield f"data: {json.dumps(data)}\n\n"
 
         # data = {"insight_name": insight_name, "insight": insight, "sql_query": sql_query, "explained_sql_code": explained_sql_code, "explained_python_code": explained_python_code, "time_taken_for_sql_query": str(time_taken_for_sql_query), "time_taken_for_sql_execution": str(time_taken_for_sql_execution), "time_taken_for_insights": str(time_taken_for_insights), "time_taken_for_explain": str(time_taken_for_explain), "code": code, "insight_fetch": csv_str, "base64_plot": base64_plot}
         # yield f"data: {json.dumps(data)}\n\n"
         # return insight_name, insight, sql_query, explained_sql_code, explained_python_code, time_taken_for_sql_query, time_taken_for_sql_execution, time_taken_for_insights, time_taken_for_explain, code
+
+    def forecast_memo_query(self, user_query):
+        try:
+            conn = odbc.connect(connection_string)
+            selected_tables = ['KPI_VTPF','RevenueVTPF']
+            custom_prompt = '''SQL tables with their properties and data:'''
+            df_dict = {}
+            for table_idx, table in enumerate(selected_tables):
+                # print("selected tablesssss:", selected_tables)
+                table_query = f'SELECT column_name AS "column_name", data_type FROM INFORMATION_SCHEMA.COLUMNS WHERE LOWER(table_name) = LOWER(\'{table}\')'
+                column_df = pd.read_sql(table_query, conn)
+                five_rows_query = f'select * from {table}'
+                dataframe_five_rows = pd.read_sql(five_rows_query, conn)
+                df_dict[table] = dataframe_five_rows
+                user_prompt = " "
+                each_table = f"""
+
+                Table: {str(table_idx)}
+                    Table name : {table}
+
+                    Table properties: 
+                    {column_df.to_csv(index=False)}
+
+                    Complete records:
+                    {dataframe_five_rows.to_csv(index=False)}
+                    
+                -------------------
+                """
+
+                custom_prompt = custom_prompt + each_table
+
+            print("PREEEEEEEEEEEEEEEEEEEEEEEE", custom_prompt)
+            output_list = []
+            for q in user_query.split('?,'):
+                question = q.strip()
+                if all(char in question.lower() for char in ("wow", "vtf", "emea")):
+                    prompt = """
+                        from following two tables create textual summary based on QUESTION. Textual summary should be short and crisp. 
+                    Results should contain textual summary.
+                    Consider the given two tables and QUESTION then frame your SUMMARY accordingly.
+                    Understand from below example and make sure to keep the same format of SUMMARY for particular QUESTION.
+                    For example:
+                    Sample data of Tables KPI_VTPF and RevenueVTPF.
+                    Table: 0
+                                                Table name : KPI_VTPF
+
+                                                Table properties:
+                                                column_name,data_type
+                    Region,nvarchar
+                    WoW,nvarchar
+                    Cuurent_Year,nvarchar
+                    Last_Year,nvarchar
+                    Forecast,nvarchar
+                    YoY,nvarchar
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,wow,cuurent_year,last_year,forecast,yoy,vtf
+                    EMEA,SRPVs,1.40%,5.60%,-0.60%,-4.20%,-2.00%
+                    EMEA,RPM,2.00%,-4.30%,0.40%,6.30%,+1.50%
+                    EMEA,RPM S,1.90%,-2.60%,0.00%,4.50%,0.00%
+                    EMEA,RPM D,0.10%,-1.70%,0.00%,1.80%,0.00%
+                    EMEA,Resid,0.00%,-0.20%,0.00%,0.20%,0.00%
+                    EMEA,Total,3.40%,1.10%,-0.20%,2.30%,0.00%
+                    NA,SRPVs,2.50%,0.90%,2.10%,1.70%,+3.60%
+                    NA,RPM,-1.30%,-1.90%,0.10%,0.60%,-0.60%
+                    NA,RPM S,0.20%,-1.70%,0.00%,1.90%,-1.50%
+                    NA,RPM D,-1.50%,-0.20%,0.00%,-1.30%,0.00%
+                    NA,Resid,0.00%,0.00%,0.00%,0.00%,0.00%
+                    NA,Total,1.20%,-1.10%,2.20%,2.20%,-1.00%
+
+
+                                                -------------------
+
+
+                                                Table: 1
+                                                    Table name : RevenueVTPF
+
+                                                    Table properties:
+                                                    column_name,data_type
+                    Region,nvarchar
+                    Date,date
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,date,vtf
+                    EMEA,2024-08-14,-2.30%
+                    EMEA,2024-08-15,-1.80%
+                    EMEA,2024-08-16,-1.50%
+                    EMEA,2024-08-17,-1.00%
+                    EMEA,2024-08-18,0.40%
+                    EMEA,2024-08-19,0.70%
+                    EMEA,2024-08-20,0.80%
+                    EMEA,2024-08-21,1.20%
+                    NA,2024-08-14,2.90%
+                    NA,2024-08-15,2.80%
+                    NA,2024-08-16,2.90%
+                    NA,2024-08-17,3.30%
+                    NA,2024-08-18,3.60%
+                    NA,2024-08-19,3.50%
+                    NA,2024-08-20,2.60%
+                    NA,2024-08-21,1.80%
+
+
+                                                -------------------
+                    QUESTION: What is WoW VTF of Total of EMEA region for 2024-08-14?
+                    SUMMARY: For EMEA PCT organic Core R7 VTPF, we observe an increase of +3.5pts (-2.3pts on 8/14 vs +1.2pts on 8/21) driven by the following contributors.
+                    Here in example QUESTION user wants to know about WoW VTF of Total of EMEA region for 14th August 2024 of RevenueVTPF table.
+                    And in SUMMARY we have 8/14 that means 14th August and 8/21 means 21st August, which is week-on-week with LAG of 7 days of 14th August.
+                    -2.3pts is the value on 14th August and +1.2pts is the value on 21st August, so there is increase of +3.5pts(1.2-(-2.3)).
+                    If the data is not provided or the provided dataframe is blank then give output as <NO DATA AVAILABLE FOR GIVEN QUESTION.>
+                    While generating textual SUMMARY for the QUESTION, first analyze the tables and then decide if there needs to be increase or decrease in sentence.
+                    **CAREFULLY ANALYZE IF THE VALUE INDICATES AN INCREASE OR DECREASE, AND MENTION TERMS LIKE "INCREASE", "DECREASE", "HIGHER THAN", "LOWER THAN", "LESS THAN", "MORE THAN" APPROPRIATELY WHILE GENERATING THE SUMMARY.
+                    **ENSURE YOU ARE MINDFUL OF "+" AND "-" SIGNS IN THE TABLE DATA WHILE GENERATING THE SUMMARY.**
+                    WoW means week-on-week with LAG of 7 days.
+                    **MAINTAIN THE SAME FORMAT OF SUMMARY WITH VALUES FROM DATA PROVIDED BELOW. ONLY GIVE SUMMARY IN THE OUTPUT. DO NOT GENERATE ANY EXPLANATION**
+                    **UNDERSTAND FROM ABOVE EXAMPLE SAMPLE DATA AND EXAMPLE SUMMARY AND GENERATE FINAL SUMMARY FOR ACTUAL DATA PROVIDED BELOW**
+                    Before generating the final SUMMARY, ensure that SUMMARY should adhere to the following guidelines:
+                    - Maintain accuracy: Ensure that any comparison between values (like percentages) reflects the correct logical relationship (e.g., an increase should not be described as "less than" a decrease).
+                    - Clarity: Rephrase sentences if needed to make the comparison or statement clear and unambiguous. Avoid vague terms or inconsistent descriptions.
+                    - Context Awareness: Consider all given context (like forecasts and actual values) and reflect that accurately in your response.
+                    QUESTION: """+question+"""
+                    DATA:
+                    """
+                    completion = openai.ChatCompletion.create(
+                        engine="gpt-4o-msn",
+                        temperature=0,
+                        max_tokens = 4000,
+                        messages=[{'role': 'system', 'content': 'You are a text summarizer '},
+                                {"role": "user", "content": prompt+custom_prompt}])
+                    # Retrieve the generated insight and python code from the response.
+                    output = completion["choices"][0]["message"]['content']
+                    # print(completion)
+                    # print(output)
+                    if 'SUMMARY' in output:
+                        output = output[output.find('SUMMARY')+9:]
+                    else:
+                        output = output
+                    
+                    output_list.insert(0,output)
+                    time.sleep(3)
+
+                elif all(char in question.lower() for char in ("wow", "srpvs", "forecast", "emea")):
+                    prompt = """
+                        from following two tables create textual summary based on QUESTION. Textual summary should be short and crisp. 
+                    Results should contain textual summary.
+                    Consider the given two tables and QUESTION then frame your SUMMARY accordingly.
+                    Understand from below example and make sure to keep the same format of SUMMARY for particular QUESTION.
+                    For example:
+                    Sample data of Tables KPI_VTPF and RevenueVTPF.
+                    Table: 0
+                                                Table name : KPI_VTPF
+
+                                                Table properties:
+                                                column_name,data_type
+                    Region,nvarchar
+                    WoW,nvarchar
+                    Cuurent_Year,nvarchar
+                    Last_Year,nvarchar
+                    Forecast,nvarchar
+                    YoY,nvarchar
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,wow,cuurent_year,last_year,forecast,yoy,vtf
+                    EMEA,SRPVs,1.40%,5.60%,-0.60%,-4.20%,-2.00%
+                    EMEA,RPM,2.00%,-4.30%,0.40%,6.30%,+1.50%
+                    EMEA,RPM S,1.90%,-2.60%,0.00%,4.50%,0.00%
+                    EMEA,RPM D,0.10%,-1.70%,0.00%,1.80%,0.00%
+                    EMEA,Resid,0.00%,-0.20%,0.00%,0.20%,0.00%
+                    EMEA,Total,3.40%,1.10%,-0.20%,2.30%,0.00%
+                    NA,SRPVs,2.50%,0.90%,2.10%,1.70%,+3.60%
+                    NA,RPM,-1.30%,-1.90%,0.10%,0.60%,-0.60%
+                    NA,RPM S,0.20%,-1.70%,0.00%,1.90%,-1.50%
+                    NA,RPM D,-1.50%,-0.20%,0.00%,-1.30%,0.00%
+                    NA,Resid,0.00%,0.00%,0.00%,0.00%,0.00%
+                    NA,Total,1.20%,-1.10%,2.20%,2.20%,-1.00%
+
+
+                                                -------------------
+
+
+                                                Table: 1
+                                                    Table name : RevenueVTPF
+
+                                                    Table properties:
+                                                    column_name,data_type
+                    Region,nvarchar
+                    Date,date
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,date,vtf
+                    EMEA,2024-08-14,-2.30%
+                    EMEA,2024-08-15,-1.80%
+                    EMEA,2024-08-16,-1.50%
+                    EMEA,2024-08-17,-1.00%
+                    EMEA,2024-08-18,0.40%
+                    EMEA,2024-08-19,0.70%
+                    EMEA,2024-08-20,0.80%
+                    EMEA,2024-08-21,1.20%
+                    NA,2024-08-14,2.90%
+                    NA,2024-08-15,2.80%
+                    NA,2024-08-16,2.90%
+                    NA,2024-08-17,3.30%
+                    NA,2024-08-18,3.60%
+                    NA,2024-08-19,3.50%
+                    NA,2024-08-20,2.60%
+                    NA,2024-08-21,1.80%
+
+
+                                                -------------------
+                    QUESTION: Compare WoW of SRPVs values between current year, last year and forecast for EMEA in single sentence?
+                    SUMMARY: -2.0pts: SRPVs saw an increase this year (+1.4% WoW) which is lesser than previous year (+5.6% WoW) but higher than the forecasted value (-0.6% WoW, chart1).
+                    Here in example QUESTION user wants to compare values from KPI_VTPF table for SRPVs and EMEA.
+                    And in SUMMARY we have -2.0pts ("-" sign in value because value in VTF Column of KPI_VTPF table is negative but if we have positive value then you need to use "+" sign in value) from VTF column, +1.4% from Cuurent_Year column, +5.6% from Last_Year column and -0.6% from Forecast column of KPI_VTPF table.
+                    There must be chart1 mentioned in SUMMARY.
+                    If the data is not provided or the provided dataframe is blank then give output as <NO DATA AVAILABLE FOR GIVEN QUESTION.>
+                    While generating textual SUMMARY for the QUESTION, first analyze the tables and then decide if there needs to be increase or decrease in sentence.
+                    **CAREFULLY ANALYZE IF THE VALUE INDICATES AN INCREASE OR DECREASE, AND MENTION TERMS LIKE "INCREASE", "DECREASE", "HIGHER THAN", "LOWER THAN", "LESS THAN", "MORE THAN" APPROPRIATELY WHILE GENERATING THE SUMMARY.
+                    **ENSURE YOU ARE MINDFUL OF "+" AND "-" SIGNS IN THE TABLE DATA WHILE GENERATING THE SUMMARY.**
+                    **MAINTAIN THE FORMAT OF SUMMARY. ONLY GIVE SUMMARY IN THE OUTPUT. DO NOT GENERATE ANY EXPLANATION**
+                    **UNDERSTAND FROM ABOVE EXAMPLE SAMPLE DATA AND EXAMPLE SUMMARY AND GENERATE FINAL SUMMARY FOR ACTUAL DATA PROVIDED BELOW**
+                    Before generating the final SUMMARY, ensure that SUMMARY should adhere to the following guidelines:
+                    - Maintain accuracy: Ensure that any comparison between values (like percentages) reflects the correct logical relationship (e.g., an increase should not be described as "less than" a decrease).
+                    - Clarity: Rephrase sentences if needed to make the comparison or statement clear and unambiguous. Avoid vague terms or inconsistent descriptions.
+                    - Context Awareness: Consider all given context (like forecasts and actual values) and reflect that accurately in your response.
+                    QUESTION: """+question+"""
+                    DATA:
+                    """
+                    completion = openai.ChatCompletion.create(
+                        engine="gpt-4o-msn",
+                        temperature=0,
+                        max_tokens = 4000,
+                        messages=[{'role': 'system', 'content': 'You are a text summarizer '},
+                                {"role": "user", "content": prompt+custom_prompt}])
+                    # Retrieve the generated insight and python code from the response.
+                    output = completion["choices"][0]["message"]['content']
+                    # print(completion)
+                    # print(output)
+                    if 'SUMMARY' in output:
+                        output = output[output.find('SUMMARY')+9:]
+                    else:
+                        output = output
+                    
+                    output_list.insert(1,output)
+                    time.sleep(3)
+                
+                elif all(char in question.lower() for char in ("rpm", "forecast", "emea")):
+                    prompt = """
+                        from following two tables create textual summary based on QUESTION. Textual summary should be short and crisp. 
+                    Results should contain textual summary.
+                    Consider the given two tables and QUESTION then frame your SUMMARY accordingly.
+                    Understand from below example and make sure to keep the same format of SUMMARY for particular QUESTION.
+                    For example:
+                    Sample data of Tables KPI_VTPF and RevenueVTPF.
+                    Table: 0
+                                                Table name : KPI_VTPF
+
+                                                Table properties:
+                                                column_name,data_type
+                    Region,nvarchar
+                    WoW,nvarchar
+                    Cuurent_Year,nvarchar
+                    Last_Year,nvarchar
+                    Forecast,nvarchar
+                    YoY,nvarchar
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,wow,cuurent_year,last_year,forecast,yoy,vtf
+                    EMEA,SRPVs,1.40%,5.60%,-0.60%,-4.20%,-2.00%
+                    EMEA,RPM,2.00%,-4.30%,0.40%,6.30%,+1.50%
+                    EMEA,RPM S,1.90%,-2.60%,0.00%,4.50%,0.00%
+                    EMEA,RPM D,0.10%,-1.70%,0.00%,1.80%,0.00%
+                    EMEA,Resid,0.00%,-0.20%,0.00%,0.20%,0.00%
+                    EMEA,Total,3.40%,1.10%,-0.20%,2.30%,0.00%
+                    NA,SRPVs,2.50%,0.90%,2.10%,1.70%,+3.60%
+                    NA,RPM,-1.30%,-1.90%,0.10%,0.60%,-0.60%
+                    NA,RPM S,0.20%,-1.70%,0.00%,1.90%,-1.50%
+                    NA,RPM D,-1.50%,-0.20%,0.00%,-1.30%,0.00%
+                    NA,Resid,0.00%,0.00%,0.00%,0.00%,0.00%
+                    NA,Total,1.20%,-1.10%,2.20%,2.20%,-1.00%
+
+
+                                                -------------------
+
+
+                                                Table: 1
+                                                    Table name : RevenueVTPF
+
+                                                    Table properties:
+                                                    column_name,data_type
+                    Region,nvarchar
+                    Date,date
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,date,vtf
+                    EMEA,2024-08-14,-2.30%
+                    EMEA,2024-08-15,-1.80%
+                    EMEA,2024-08-16,-1.50%
+                    EMEA,2024-08-17,-1.00%
+                    EMEA,2024-08-18,0.40%
+                    EMEA,2024-08-19,0.70%
+                    EMEA,2024-08-20,0.80%
+                    EMEA,2024-08-21,1.20%
+                    NA,2024-08-14,2.90%
+                    NA,2024-08-15,2.80%
+                    NA,2024-08-16,2.90%
+                    NA,2024-08-17,3.30%
+                    NA,2024-08-18,3.60%
+                    NA,2024-08-19,3.50%
+                    NA,2024-08-20,2.60%
+                    NA,2024-08-21,1.80%
+
+
+                                                -------------------
+                    QUESTION: Compare current year, last year and forecast for EMEA region for RPM in single sentence?
+                    SUMMARY: +1.5pts: RPM saw an increase this year (+2.0% WoW, supply driven) which is relatively higher than the forecasted value (+0.4% WoW, chart2).
+                    Here in example QUESTION user wants to compare values from KPI_VTPF table for RPM and EMEA.
+                    And in SUMMARY we have +1.5pts ("+" sign in value because value in VTF Column of KPI_VTPF table is positive but if we have negative value then you need to use "-" sign in value) from VTF column and RPM row, +2.0% from Cuurent_Year column and RPM row and +0.4% from Forecast column and RPM row of KPI_VTPF table.
+                    In KPI_VTPF table, for EMEA region, Cuurent_Year RPM value is the sum of Cuurent_Year RPM S and RPM D values (+2.0 = 1.9+0.1). Among RPM S and RPM D, the greater contribution of RPM S that's why we have supply driven in SUMMARY. If we have greater contribution of RPM D and there must be demand driven instead of supply driven in the SUMMARY.
+                    There must be chart2 mentioned in SUMMARY.
+                    **Put focus on forecasted value and demand driven or supply driven. Double check these things before generating final SUMMARY.**
+                    If the data is not provided or the provided dataframe is blank then give output as <NO DATA AVAILABLE FOR GIVEN QUESTION.>
+                    While generating textual SUMMARY for the QUESTION, first analyze the tables and then decide if there needs to be increase or decrease in sentence.
+                    **CAREFULLY ANALYZE IF THE VALUE INDICATES AN INCREASE OR DECREASE, AND MENTION TERMS LIKE "INCREASE", "DECREASE", "HIGHER THAN", "LOWER THAN", "LESS THAN", "MORE THAN" APPROPRIATELY WHILE GENERATING THE SUMMARY.
+                    **ENSURE YOU ARE MINDFUL OF "+" AND "-" SIGNS IN THE TABLE DATA WHILE GENERATING THE SUMMARY.**
+                    **MAINTAIN THE FORMAT OF SUMMARY. ONLY GIVE SUMMARY IN THE OUTPUT. DO NOT GENERATE ANY EXPLANATION**
+                    **UNDERSTAND FROM ABOVE EXAMPLE SAMPLE DATA AND EXAMPLE SUMMARY AND GENERATE FINAL SUMMARY FOR ACTUAL DATA PROVIDED BELOW**
+                    Before generating the final SUMMARY, ensure that SUMMARY should adhere to the following guidelines:
+                    - Maintain accuracy: Ensure that any comparison between values (like percentages) reflects the correct logical relationship (e.g., an increase should not be described as "less than" a decrease).
+                    - Clarity: Rephrase sentences if needed to make the comparison or statement clear and unambiguous. Avoid vague terms or inconsistent descriptions.
+                    - Context Awareness: Consider all given context (like forecasts and actual values) and reflect that accurately in your response.
+                    QUESTION: """+question+"""
+                    DATA:
+                    """
+                    completion = openai.ChatCompletion.create(
+                        engine="gpt-4o-msn",
+                        temperature=0,
+                        max_tokens = 4000,
+                        messages=[{'role': 'system', 'content': 'You are a text summarizer '},
+                                {"role": "user", "content": prompt+custom_prompt}])
+                    # Retrieve the generated insight and python code from the response.
+                    output = completion["choices"][0]["message"]['content']
+                    # print(completion)
+                    # print(output)
+                    if 'SUMMARY' in output:
+                        output = output[output.find('SUMMARY')+9:]
+                    else:
+                        output = output
+                    
+                    output_list.insert(2,output)
+                    time.sleep(3)
+
+                elif all(char in question.lower() for char in ("wow", "vtf", "na")):
+                    prompt = """
+                        from following two tables create textual summary based on QUESTION. Textual summary should be short and crisp. 
+                    Results should contain textual summary.
+                    Consider the given two tables and QUESTION then frame your SUMMARY accordingly.
+                    Understand from below example and make sure to keep the same format of SUMMARY for particular QUESTION.
+                    For example:
+                    Sample data of Tables KPI_VTPF and RevenueVTPF.
+                    Table: 0
+                                                Table name : KPI_VTPF
+
+                                                Table properties:
+                                                column_name,data_type
+                    Region,nvarchar
+                    WoW,nvarchar
+                    Cuurent_Year,nvarchar
+                    Last_Year,nvarchar
+                    Forecast,nvarchar
+                    YoY,nvarchar
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,wow,cuurent_year,last_year,forecast,yoy,vtf
+                    EMEA,SRPVs,1.40%,5.60%,-0.60%,-4.20%,-2.00%
+                    EMEA,RPM,2.00%,-4.30%,0.40%,6.30%,+1.50%
+                    EMEA,RPM S,1.90%,-2.60%,0.00%,4.50%,0.00%
+                    EMEA,RPM D,0.10%,-1.70%,0.00%,1.80%,0.00%
+                    EMEA,Resid,0.00%,-0.20%,0.00%,0.20%,0.00%
+                    EMEA,Total,3.40%,1.10%,-0.20%,2.30%,0.00%
+                    NA,SRPVs,2.50%,0.90%,2.10%,1.70%,+3.60%
+                    NA,RPM,-1.30%,-1.90%,0.10%,0.60%,-0.60%
+                    NA,RPM S,0.20%,-1.70%,0.00%,1.90%,-1.50%
+                    NA,RPM D,-1.50%,-0.20%,0.00%,-1.30%,0.00%
+                    NA,Resid,0.00%,0.00%,0.00%,0.00%,0.00%
+                    NA,Total,1.20%,-1.10%,2.20%,2.20%,-1.00%
+
+
+                                                -------------------
+
+
+                                                Table: 1
+                                                    Table name : RevenueVTPF
+
+                                                    Table properties:
+                                                    column_name,data_type
+                    Region,nvarchar
+                    Date,date
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,date,vtf
+                    EMEA,2024-08-14,-2.30%
+                    EMEA,2024-08-15,-1.80%
+                    EMEA,2024-08-16,-1.50%
+                    EMEA,2024-08-17,-1.00%
+                    EMEA,2024-08-18,0.40%
+                    EMEA,2024-08-19,0.70%
+                    EMEA,2024-08-20,0.80%
+                    EMEA,2024-08-21,1.20%
+                    NA,2024-08-14,2.90%
+                    NA,2024-08-15,2.80%
+                    NA,2024-08-16,2.90%
+                    NA,2024-08-17,3.30%
+                    NA,2024-08-18,3.60%
+                    NA,2024-08-19,3.50%
+                    NA,2024-08-20,2.60%
+                    NA,2024-08-21,1.80%
+
+
+                                                -------------------
+                    QUESTION: What is WoW VTF of Total of NA region for 2024-08-14?
+                    SUMMARY: For NA PCT organic Core R7 VTPF, we observe a decrease of +1.1pts (+2.9pts on 8/14 vs +1.8pts on 8/21) driven by the following contributors.
+                    Here in example QUESTION user wants to know about WoW VTF of Total of NA region for 14th August 2024.
+                    And in SUMMARY we have 8/14 that means 14th August and 8/21 means 21st August, which is week-on-week with LAG of 7 days of 14th August.
+                    +2.9pts is the value on 14th August and +1.8pts is the value on 21st August, so there is decrease of +1.1pts(1.8-2.9).
+                    If the data is not provided or the provided dataframe is blank then give output as <NO DATA AVAILABLE FOR GIVEN QUESTION.>
+                    While generating textual SUMMARY for the QUESTION, first analyze the tables and then decide if there needs to be increase or decrease in sentence.
+                    **CAREFULLY ANALYZE IF THE VALUE INDICATES AN INCREASE OR DECREASE, AND MENTION TERMS LIKE "INCREASE", "DECREASE", "HIGHER THAN", "LOWER THAN", "LESS THAN", "MORE THAN" APPROPRIATELY WHILE GENERATING THE SUMMARY.
+                    **ENSURE YOU ARE MINDFUL OF "+" AND "-" SIGNS IN THE TABLE DATA WHILE GENERATING THE SUMMARY.**
+                    **MAINTAIN THE FORMAT OF SUMMARY. ONLY GIVE SUMMARY IN THE OUTPUT. DO NOT GENERATE ANY EXPLANATION**
+                    **UNDERSTAND FROM ABOVE EXAMPLE SAMPLE DATA AND EXAMPLE SUMMARY AND GENERATE FINAL SUMMARY FOR ACTUAL DATA PROVIDED BELOW**
+                    Before generating the final SUMMARY, ensure that SUMMARY should adhere to the following guidelines:
+                    - Maintain accuracy: Ensure that any comparison between values (like percentages) reflects the correct logical relationship (e.g., an increase should not be described as "less than" a decrease).
+                    - Clarity: Rephrase sentences if needed to make the comparison or statement clear and unambiguous. Avoid vague terms or inconsistent descriptions.
+                    - Context Awareness: Consider all given context (like forecasts and actual values) and reflect that accurately in your response.
+                    QUESTION: """+question+"""
+                    DATA:
+                    """
+                    completion = openai.ChatCompletion.create(
+                        engine="gpt-4o-msn",
+                        temperature=0,
+                        max_tokens = 4000,
+                        messages=[{'role': 'system', 'content': 'You are a text summarizer '},
+                                {"role": "user", "content": prompt+custom_prompt}])
+                    # Retrieve the generated insight and python code from the response.
+                    output = completion["choices"][0]["message"]['content']
+                    # print(completion)
+                    # print(output)
+                    if 'SUMMARY' in output:
+                        output = output[output.find('SUMMARY')+9:]
+                    else:
+                        output = output
+                    
+                    output_list.insert(3,output)
+                    time.sleep(3)
+
+                elif all(char in question.lower() for char in ("wow", "srpvs", "forecast", "na")):
+                    prompt = """
+                        from following two tables create textual summary based on QUESTION. Textual summary should be short and crisp. 
+                    Results should contain textual summary.
+                    Consider the given two tables and QUESTION then frame your SUMMARY accordingly.
+                    Understand from below example and make sure to keep the same format of SUMMARY for particular QUESTION.
+                    For example:
+                    Sample data of Tables KPI_VTPF and RevenueVTPF.
+                    Table: 0
+                                                Table name : KPI_VTPF
+
+                                                Table properties:
+                                                column_name,data_type
+                    Region,nvarchar
+                    WoW,nvarchar
+                    Cuurent_Year,nvarchar
+                    Last_Year,nvarchar
+                    Forecast,nvarchar
+                    YoY,nvarchar
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,wow,cuurent_year,last_year,forecast,yoy,vtf
+                    EMEA,SRPVs,1.40%,5.60%,-0.60%,-4.20%,-2.00%
+                    EMEA,RPM,2.00%,-4.30%,0.40%,6.30%,+1.50%
+                    EMEA,RPM S,1.90%,-2.60%,0.00%,4.50%,0.00%
+                    EMEA,RPM D,0.10%,-1.70%,0.00%,1.80%,0.00%
+                    EMEA,Resid,0.00%,-0.20%,0.00%,0.20%,0.00%
+                    EMEA,Total,3.40%,1.10%,-0.20%,2.30%,0.00%
+                    NA,SRPVs,2.50%,0.90%,2.10%,1.70%,+3.60%
+                    NA,RPM,-1.30%,-1.90%,0.10%,0.60%,-0.60%
+                    NA,RPM S,0.20%,-1.70%,0.00%,1.90%,-1.50%
+                    NA,RPM D,-1.50%,-0.20%,0.00%,-1.30%,0.00%
+                    NA,Resid,0.00%,0.00%,0.00%,0.00%,0.00%
+                    NA,Total,1.20%,-1.10%,2.20%,2.20%,-1.00%
+
+
+                                                -------------------
+
+
+                                                Table: 1
+                                                    Table name : RevenueVTPF
+
+                                                    Table properties:
+                                                    column_name,data_type
+                    Region,nvarchar
+                    Date,date
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,date,vtf
+                    EMEA,2024-08-14,-2.30%
+                    EMEA,2024-08-15,-1.80%
+                    EMEA,2024-08-16,-1.50%
+                    EMEA,2024-08-17,-1.00%
+                    EMEA,2024-08-18,0.40%
+                    EMEA,2024-08-19,0.70%
+                    EMEA,2024-08-20,0.80%
+                    EMEA,2024-08-21,1.20%
+                    NA,2024-08-14,2.90%
+                    NA,2024-08-15,2.80%
+                    NA,2024-08-16,2.90%
+                    NA,2024-08-17,3.30%
+                    NA,2024-08-18,3.60%
+                    NA,2024-08-19,3.50%
+                    NA,2024-08-20,2.60%
+                    NA,2024-08-21,1.80%
+
+
+                                                -------------------
+                    QUESTION: Compare WoW of SRPVs values between current year, last year and forecast for NA in single sentence?
+                    SUMMARY: +3.6pts: SRPVs saw an increase this year (+2.5% WoW) which is higher than the previous year (+0.9% WoW) and slightly higher than the forecasted value (+2.1% WoW, chart3).
+                    Here in example QUESTION user wants to compare values from KPI_VTPF table for SRPVs and NA.
+                    And in SUMMARY we have +3.6pts ("+" sign in value because value in VTF Column of KPI_VTPF table is positive but if we have negative value then you need to use "-" sign in value) from VTF column, +2.5% from Cuurent_Year column, +0.9% from Last_Year column and +2.1% from Forecast column of KPI_VTPF table.
+                    There must be chart3 mentioned in SUMMARY.
+                    If the data is not provided or the provided dataframe is blank then give output as <NO DATA AVAILABLE FOR GIVEN QUESTION.>
+                    While generating textual SUMMARY for the QUESTION, first analyze the tables and then decide if there needs to be increase or decrease in sentence.
+                    **CAREFULLY ANALYZE IF THE VALUE INDICATES AN INCREASE OR DECREASE, AND MENTION TERMS LIKE "INCREASE", "DECREASE", "HIGHER THAN", "LOWER THAN", "LESS THAN", "MORE THAN" APPROPRIATELY WHILE GENERATING THE SUMMARY.
+                    **ENSURE YOU ARE MINDFUL OF "+" AND "-" SIGNS IN THE TABLE DATA WHILE GENERATING THE SUMMARY.**
+                    **MAINTAIN THE FORMAT OF SUMMARY. ONLY GIVE SUMMARY IN THE OUTPUT. DO NOT GENERATE ANY EXPLANATION**
+                    **UNDERSTAND FROM ABOVE EXAMPLE SAMPLE DATA AND EXAMPLE SUMMARY AND GENERATE FINAL SUMMARY FOR ACTUAL DATA PROVIDED BELOW**
+                    Before generating the final SUMMARY, ensure that SUMMARY should adhere to the following guidelines:
+                    - Maintain accuracy: Ensure that any comparison between values (like percentages) reflects the correct logical relationship (e.g., an increase should not be described as "less than" a decrease).
+                    - Clarity: Rephrase sentences if needed to make the comparison or statement clear and unambiguous. Avoid vague terms or inconsistent descriptions.
+                    - Context Awareness: Consider all given context (like forecasts and actual values) and reflect that accurately in your response.
+                    QUESTION: """+question+"""
+                    DATA:
+                    """
+                    completion = openai.ChatCompletion.create(
+                        engine="gpt-4o-msn",
+                        temperature=0,
+                        max_tokens = 4000,
+                        messages=[{'role': 'system', 'content': 'You are a text summarizer '},
+                                {"role": "user", "content": prompt+ custom_prompt}])
+                    # Retrieve the generated insight and python code from the response.
+                    output = completion["choices"][0]["message"]['content']
+                    # print(completion)
+                    # print(output)
+                    if 'SUMMARY' in output:
+                        output = output[output.find('SUMMARY')+9:]
+                    else:
+                        output = output
+                    
+                    output_list.insert(4,output)
+                    time.sleep(3)
+
+                elif all(char in question.lower() for char in ("rpm", "forecast", "na")):
+                    prompt = """
+                        from following two tables create textual summary based on QUESTION. Textual summary should be short and crisp. 
+                    Results should contain textual summary.
+                    Consider the given two tables and QUESTION then frame your SUMMARY accordingly.
+                    Understand from below example and make sure to keep the same format of SUMMARY for particular QUESTION.
+                    For example:
+                    Sample data of Tables KPI_VTPF and RevenueVTPF.
+                    Table: 0
+                                                Table name : KPI_VTPF
+
+                                                Table properties:
+                                                column_name,data_type
+                    Region,nvarchar
+                    WoW,nvarchar
+                    Cuurent_Year,nvarchar
+                    Last_Year,nvarchar
+                    Forecast,nvarchar
+                    YoY,nvarchar
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,wow,cuurent_year,last_year,forecast,yoy,vtf
+                    EMEA,SRPVs,1.40%,5.60%,-0.60%,-4.20%,-2.00%
+                    EMEA,RPM,2.00%,-4.30%,0.40%,6.30%,+1.50%
+                    EMEA,RPM S,1.90%,-2.60%,0.00%,4.50%,0.00%
+                    EMEA,RPM D,0.10%,-1.70%,0.00%,1.80%,0.00%
+                    EMEA,Resid,0.00%,-0.20%,0.00%,0.20%,0.00%
+                    EMEA,Total,3.40%,1.10%,-0.20%,2.30%,0.00%
+                    NA,SRPVs,2.50%,0.90%,2.10%,1.70%,+3.60%
+                    NA,RPM,-1.30%,-1.90%,0.10%,0.60%,-0.60%
+                    NA,RPM S,0.20%,-1.70%,0.00%,1.90%,-1.50%
+                    NA,RPM D,-1.50%,-0.20%,0.00%,-1.30%,0.00%
+                    NA,Resid,0.00%,0.00%,0.00%,0.00%,0.00%
+                    NA,Total,1.20%,-1.10%,2.20%,2.20%,-1.00%
+
+
+                                                -------------------
+
+
+                                                Table: 1
+                                                    Table name : RevenueVTPF
+
+                                                    Table properties:
+                                                    column_name,data_type
+                    Region,nvarchar
+                    Date,date
+                    VTF,nvarchar
+
+
+                                                    Complete records:
+                                                    region,date,vtf
+                    EMEA,2024-08-14,-2.30%
+                    EMEA,2024-08-15,-1.80%
+                    EMEA,2024-08-16,-1.50%
+                    EMEA,2024-08-17,-1.00%
+                    EMEA,2024-08-18,0.40%
+                    EMEA,2024-08-19,0.70%
+                    EMEA,2024-08-20,0.80%
+                    EMEA,2024-08-21,1.20%
+                    NA,2024-08-14,2.90%
+                    NA,2024-08-15,2.80%
+                    NA,2024-08-16,2.90%
+                    NA,2024-08-17,3.30%
+                    NA,2024-08-18,3.60%
+                    NA,2024-08-19,3.50%
+                    NA,2024-08-20,2.60%
+                    NA,2024-08-21,1.80%
+
+
+                                                -------------------
+                    QUESTION: Compare current year, last year and forecast for NA region for RPM in single sentence?
+                    SUMMARY: -0.6pts: RPM saw a decrease this year (-1.3% WoW, demand driven) which is quite less than the forecasted value (+0.1% WoW).
+                    Here in example QUESTION user wants to compare values from KPI_VTPF table for RPM and NA.
+                    And in SUMMARY we have -0.6pts ("-" sign in value because value in VTF Column of KPI_VTPF table is negative but if we have positive value then you need to use "+" sign in value) from VTF column and RPM row for NA region, -1.3% from Cuurent_Year column and RPM row and +0.1% from forecast column and RPM row of wow column and NA row of region column of KPI_VTPF table.
+                    In KPI_VTPF table, for NA region, Cuurent_Year RPM value is the sum of Cuurent_Year RPM S and RPM D values (-1.3 = 0.2+(-1.5)). Among RPM S and RPM D, the greater contribution of RPM D that's why we have demand driven in SUMMARY. If we have greater contribution of RPM S and there must be supply driven instead of demand driven in the SUMMARY.
+                    **Put focus on forecasted value(from forecast column) and demand driven or supply driven. Double check these things before generating final SUMMARY.**
+                    If the data is not provided or the provided dataframe is blank then give output as <NO DATA AVAILABLE FOR GIVEN QUESTION.>
+                    While generating textual SUMMARY for the QUESTION, first analyze the tables and then decide if there needs to be increase or decrease in sentence.
+                    **CAREFULLY ANALYZE IF THE VALUE INDICATES AN INCREASE OR DECREASE, AND MENTION TERMS LIKE "INCREASE", "DECREASE", "HIGHER THAN", "LOWER THAN", "LESS THAN", "MORE THAN" APPROPRIATELY WHILE GENERATING THE SUMMARY.
+                    **ENSURE YOU ARE MINDFUL OF "+" AND "-" SIGNS IN THE TABLE DATA WHILE GENERATING THE SUMMARY.**
+                    **MAINTAIN THE FORMAT OF SUMMARY. ONLY GIVE SUMMARY IN THE OUTPUT. DO NOT GENERATE ANY EXPLANATION**
+                    **UNDERSTAND FROM ABOVE EXAMPLE SAMPLE DATA AND EXAMPLE SUMMARY AND GENERATE FINAL SUMMARY FOR ACTUAL DATA PROVIDED BELOW**
+                    Before generating the final SUMMARY, ensure that SUMMARY should adhere to the following guidelines:
+                    - Maintain accuracy: Ensure that any comparison between values (like percentages) reflects the correct logical relationship (e.g., an increase should not be described as "less than" a decrease).
+                    - Clarity: Rephrase sentences if needed to make the comparison or statement clear and unambiguous. Avoid vague terms or inconsistent descriptions.
+                    - Context Awareness: Consider all given context (like forecasts and actual values) and reflect that accurately in your response.
+                    QUESTION: """+question+"""
+                    DATA:
+                    """
+                    completion = openai.ChatCompletion.create(
+                        engine="gpt-4o-msn",
+                        temperature=0,
+                        max_tokens = 4000,
+                        messages=[{'role': 'system', 'content': 'You are a text summarizer '},
+                                {"role": "user", "content": prompt+ custom_prompt}])
+                    # Retrieve the generated insight and python code from the response.
+                    output = completion["choices"][0]["message"]['content']
+                    # print(completion)
+                    # print(output)
+                    if 'SUMMARY' in output:
+                        output = output[output.find('SUMMARY')+9:]
+                    else:
+                        output = output
+                    
+                    output_list.insert(5,output)
+                    time.sleep(3)
+
+            print(output_list)
+            final_output = ""
+            for i,o in enumerate(output_list):
+                if i == 2:
+                    final_output += o + '\n\n'
+                else:
+                    final_output += o + '\n'
+
+            data = {"summary": final_output}
+            yield f"data: {json.dumps(data)}\n\n"
+        except Exception as e:
+            print("Error in SQL logic: ", e)
+            data = {"summary": e}
+            yield f"data: {json.dumps(data)}\n\n"
+            

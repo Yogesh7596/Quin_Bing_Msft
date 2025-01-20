@@ -1,10 +1,14 @@
 .sql-database-query {
     background-color: antiquewhite;
-    height: 100vh;
-    padding: 50px;
+    min-height: 115vh;
+    box-sizing: border-box;
+    padding: 20px 80px 50px 80px;
     .tables {
         display: flex;
         justify-content: flex-start;
+    }
+    .table1 {
+        margin-right: 30px;
     }
     .table-name {
         background: #fff;
@@ -12,5 +16,57 @@
         border-radius: 6px;
         width: 150px;
         padding: 3px 5px;
+        margin-bottom: 20px;
+    }
+
+    .csv-data {
+        display: flex;
+    }
+    .table {
+        border: 1px solid black;
+        th, td {
+            border: 1px solid black;
+            padding: 5px 10px;
+            width: max-content;
+        }
+        thead{
+            th {
+                background-color: white;
+                font-size: 22px;
+                padding: 10px 20px;
+            }
+        }
+        
+    }
+    .question-input {
+        display: flex;
+        align-items: center;
+        .questionInputContainer {
+            width: 80%;
+        }
+    }
+    .generate-insights-button {
+        height: 40px;
+        padding: 5px 10px;
+        background: rgb(37, 37, 126);
+        color: #fff;
+        margin-left: 30px;
+        border-radius: 8px;
+    }
+
+    .answer {
+        width: 80vw;
+        border: 2px solid black;
+        border-radius: 8px;
+        margin-top: 20px;
+        padding: 10px 20px;
+        min-height: 50px;
+        max-height: 3000px; /* Adjustable maximum */
+        resize: none; /* Prevent manual resizing */
+        overflow: hidden; /* Hide scrollbars */
+        &:focus {
+            border: 2px solid black !important;
+            box-shadow: none;
+        }
     }
 }

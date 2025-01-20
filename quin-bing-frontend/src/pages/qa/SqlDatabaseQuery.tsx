@@ -1,6 +1,6 @@
 import React, { useEffect, useState, lazy } from 'react';
 import { MultiSelect } from 'react-multi-select-component';
-import { Label, Panel, TextField } from '@fluentui/react';
+import { keyframes, Label, Panel, TextField } from '@fluentui/react';
 import BootstrapTable from "react-bootstrap-table-next";
 import ToolkitProvider, {
 } from "react-bootstrap-table2-toolkit/dist/react-bootstrap-table2-toolkit.min";
@@ -18,7 +18,11 @@ const OneShot = lazy(() =>
 );
 
 import './SqlDatabaseQuery.scss';
+import { QuestionInput } from '../../components/QuestionInput';
+import { Answer } from '../../components/Answer';
+import { setAnswerFromStream } from '../../helpers';
 
+let baseURL = import.meta.env.VITE_APP_API_URL
 
 const SqlDatabaseQuery = () => {
     const [database, setDatabase] = useState([])
@@ -40,6 +44,8 @@ const SqlDatabaseQuery = () => {
     const [settingsPanelOpen, setSettingsPanelOpen] = useState(false);
     const [conversationPanelOpen, setConversationsPanelOpen] = useState(false);
     const [connectionError, setConnectionError] = useState(false);
+    const [question, setQuestion] = useState('');
+    const [answer, setAnswer] = useState('');
     const data = [
         { id: 1, name: "John Doe", age: 28 },
         { id: 2, name: "Jane Smith", age: 34 },
@@ -148,8 +154,8 @@ const SqlDatabaseQuery = () => {
         //     table_names.push(table.value)
         // })
         databaseService.fetchTablesData("quickinsight", table_names).then((response) => {
-            // console.log(response)
-            setLoadedFiles(response.data.data.data);
+            console.log(response)
+            setLoadedFiles(response.data.tables_data);
             setLoadTableText("Load tables");
             setLoading(false);
         })
@@ -261,6 +267,58 @@ const SqlDatabaseQuery = () => {
         setLoading(false);
     }
 
+    const getAzureInsightsRequest = async () => {
+        setAnswer(null);
+        setLoaderMessage("Fetching answer...");
+        setLoading(true);
+        try {
+
+            // if (creditBalance <= 0) {
+            //   // Display an alert indicating insufficient balance
+            //   alert('Insufficient balance. Please recharge your account.');
+            //   return;
+            // }
+            let email; // Declare the variable
+            const storedResponse = localStorage.getItem('email');
+            const parsedResponse = storedResponse;
+            email = parsedResponse
+            const question_prompt = question
+            // console.log(question_prompt,email,database,selected_tables,showCode,showPlot)
+            // const result = await getInsightsApi(email, question_prompt, props.selectedFileName, showCode, explainCode);
+            const response = await fetch(baseURL + "/generate_insights", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    user_query: question_prompt,
+                    explain_code: false,
+                    is_plot: false,
+                    show_code: false
+                })
+            });
+
+            if (!response.ok) {
+                throw Error(response.statusText || "Unknown error");
+            }
+
+            // Check if the Response object has the `body` property with a ReadableStream
+            if (response.body && response.body instanceof ReadableStream) {
+                await setAnswerFromStream(response.body, setAnswer);
+                // console.log(response.body)
+            }
+            //const result = await response.json();
+            //console.log("re a", result);
+            //setAnswer(result);
+            //setCreditBalance(result?.credit_balance?.credit_balance)
+
+        } catch (e) {
+            // setError(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const customValueRenderer = (selectedOptions, options) => {
         return (
             <div
@@ -276,12 +334,104 @@ const SqlDatabaseQuery = () => {
         <div className='sql-database-query'>
             {loading && <LoadingOverlay message={loaderMessage} />}
             <div className='tables'>
-                <div className='table1 col-5'>
+                <div className='table1 col-4'>
                     <div className='table-name'>Revenue VTF</div>
+                    {Object.keys(loadedFiles || {}).length > 0 && (() => {
+                        const data = loadedFiles["RevenueVTPF"];
+                        const columns = [];
+
+                        // Generate columns dynamically based on the keys in the first data object
+                        Object.keys(data[0] || {}).forEach((key) => {
+                            const column = {
+                                dataField: key,
+                                text: key,
+                            };
+                            columns.push(column);
+                        });
+
+                        return (
+                            <div className="col csv-data">
+                                <ToolkitProvider
+                                    bootstrap4
+                                    keyField="index" // Ensure each row has a unique keyField
+                                    data={data.slice(0, 10)} // Use a subset of data if necessary
+                                    columns={columns} // Pass the generated columns
+                                    search
+                                    bordered={false}
+                                >
+                                    {(props) => (
+                                        <BootstrapTable
+                                            {...props.baseProps}
+                                            bordered={false}
+                                            headerClasses="table-header-fixed"
+                                        />
+                                    )}
+                                </ToolkitProvider>
+                            </div>
+                        );
+                    })()}
                 </div>
-                <div className='table2'>
+                <div className='table2 mr-3'>
                     <div className='table-name'>KPI Table</div>
+                    {Object.keys(loadedFiles || {}).length > 0 && (() => {
+                        const data = loadedFiles["KPI_VTPF"];
+                        const columns = [];
+
+                        // Generate columns dynamically based on the keys in the first data object
+                        Object.keys(data[0] || {}).forEach((key) => {
+                            const column = {
+                                dataField: key,
+                                text: key,
+                            };
+                            columns.push(column);
+                        });
+
+                        return (
+                            <div className="col csv-data">
+                                <ToolkitProvider
+                                    bootstrap4
+                                    keyField="index" // Ensure each row has a unique keyField
+                                    data={data.slice(0, 10)} // Use a subset of data if necessary
+                                    columns={columns} // Pass the generated columns
+                                    search
+                                    bordered={false}
+                                >
+                                    {(props) => (
+                                        <BootstrapTable
+                                            {...props.baseProps}
+                                            bordered={false}
+                                        />
+                                    )}
+                                </ToolkitProvider>
+                            </div>
+                        );
+                    })()}
                 </div>
+
+            </div>
+            <div className='question-input'>
+                <QuestionInput placeholder="Type a new question"
+                    disabled={loading}
+                    question={question}
+                    setQuestion={setQuestion} />
+                <button
+                    className='generate-insights-button'
+                    style={{ marginRight: '20px', background: "gray !important" }}
+                    onClick={getAzureInsightsRequest}
+                >Generate Insights</button>
+            </div>
+            <div className='mt-3' style={{ border: "1px solid black", borderRadius: "8px", background: "#fff" }}>
+                {answer ? (
+                    <Answer
+                        answer={answer}
+                        isLoading={loading}
+
+                        question={question}
+                        showCode={false}
+                        explainCode={false}
+
+                    />
+                ) : <div style={{ margin: "20px" }}><p style={{ fontSize: "14px", opacity: 0.8 }}>Results</p></div>}
             </div>
         </div>
     )

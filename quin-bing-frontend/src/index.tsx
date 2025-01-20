@@ -88,7 +88,7 @@ const App = () => {
           element: <AzureSQLDatabase />,
         },
         {
-          path: "azure_sql_query",
+          path: "forecast_memos",
           element: <SqlDatabaseQuery />,
         },
 
