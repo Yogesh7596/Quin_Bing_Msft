@@ -8,7 +8,8 @@
         justify-content: flex-start;
     }
     .table1 {
-        margin-right: 30px;
+        margin-right: 300px;
+        width: 300px;
     }
     .table-name {
         background: #fff;
@@ -68,5 +69,58 @@
             border: 2px solid black !important;
             box-shadow: none;
         }
+    }
+
+    .table-container {
+        max-height: 300px; /* Set the height of the scrollable area */
+        overflow-y: auto;  /* Enable vertical scrolling */
+        border: 1px solid black;
+        margin-bottom: 10px;
+        border-left-width: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+        margin-bottom: -15px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid black;
+        background: #fff;
+    }
+
+    thead th {
+        position: sticky;
+        top: -3px;
+        background: #d1565f;
+        height: 40px; /* Background color for the sticky header */
+        z-index: 2;
+        color: #fff !important;
+        border: 1px solid black;
+    }
+
+    tbody tr:hover {
+        background-color: #fff; /* Highlight on hover */
+    }
+
+      /* Customize scrollbar */
+    .table-container::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: #555;
     }
 }

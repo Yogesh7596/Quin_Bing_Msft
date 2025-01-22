@@ -343,30 +343,32 @@ const SqlDatabaseQuery = () => {
                         // Generate columns dynamically based on the keys in the first data object
                         Object.keys(data[0] || {}).forEach((key) => {
                             const column = {
-                                dataField: key,
-                                text: key,
+                                name: key,
+                                selector: row => row[key],
                             };
                             columns.push(column);
                         });
 
                         return (
-                            <div className="col csv-data">
-                                <ToolkitProvider
-                                    bootstrap4
-                                    keyField="index" // Ensure each row has a unique keyField
-                                    data={data.slice(0, 10)} // Use a subset of data if necessary
-                                    columns={columns} // Pass the generated columns
-                                    search
-                                    bordered={false}
-                                >
-                                    {(props) => (
-                                        <BootstrapTable
-                                            {...props.baseProps}
-                                            bordered={false}
-                                            headerClasses="table-header-fixed"
-                                        />
-                                    )}
-                                </ToolkitProvider>
+                            <div className="col csv-data table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            {columns.map(col => (
+                                                <th>{col.name}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {data.map(row => (
+                                            <tr>
+                                                {Object.values(row || {}).map(val => (
+                                                    <td>{val}</td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         );
                     })()}
@@ -380,29 +382,32 @@ const SqlDatabaseQuery = () => {
                         // Generate columns dynamically based on the keys in the first data object
                         Object.keys(data[0] || {}).forEach((key) => {
                             const column = {
-                                dataField: key,
-                                text: key,
+                                name: key,
+                                selector: row => row[key],
                             };
                             columns.push(column);
                         });
 
                         return (
-                            <div className="col csv-data">
-                                <ToolkitProvider
-                                    bootstrap4
-                                    keyField="index" // Ensure each row has a unique keyField
-                                    data={data.slice(0, 10)} // Use a subset of data if necessary
-                                    columns={columns} // Pass the generated columns
-                                    search
-                                    bordered={false}
-                                >
-                                    {(props) => (
-                                        <BootstrapTable
-                                            {...props.baseProps}
-                                            bordered={false}
-                                        />
-                                    )}
-                                </ToolkitProvider>
+                            <div className="col csv-data table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            {columns.map(col => (
+                                                <th>{col.name}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {data.map(row => (
+                                            <tr>
+                                                {Object.values(row || {}).map(val => (
+                                                    <td>{val}</td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         );
                     })()}
