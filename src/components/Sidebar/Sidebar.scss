@@ -1,0 +1,23 @@
+.sidebar {
+    position: relative;
+    width: 27vw;
+    min-height: 87vh;
+    max-height: 87vh;
+    overflow-y: auto;
+    background: #fff;
+    padding: 20px 10px 40px 10px;
+    box-shadow: 5px 0 10px rgba(0, 0, 0, 0.3);
+    .text1 {
+        padding-left: 0 !important;
+    }
+}
+
+.crossicon {
+    color: black;
+    font-size: large;
+    cursor: pointer;
+}
+
+.hide-sidebar {
+    display: none;
+}

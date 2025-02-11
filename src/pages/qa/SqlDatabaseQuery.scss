@@ -1,0 +1,126 @@
+.sql-database-query {
+    background-color: antiquewhite;
+    min-height: 115vh;
+    box-sizing: border-box;
+    padding: 20px 80px 50px 80px;
+    .tables {
+        display: flex;
+        justify-content: flex-start;
+    }
+    .table1 {
+        margin-right: 300px;
+        width: 300px;
+    }
+    .table-name {
+        background: #fff;
+        border: 2px solid black;
+        border-radius: 6px;
+        width: 150px;
+        padding: 3px 5px;
+        margin-bottom: 20px;
+    }
+
+    .csv-data {
+        display: flex;
+    }
+    .table {
+        border: 1px solid black;
+        th, td {
+            border: 1px solid black;
+            padding: 5px 10px;
+            width: max-content;
+        }
+        thead{
+            th {
+                background-color: white;
+                font-size: 22px;
+                padding: 10px 20px;
+            }
+        }
+        
+    }
+    .question-input {
+        display: flex;
+        align-items: center;
+        .questionInputContainer {
+            width: 80%;
+        }
+    }
+    .generate-insights-button {
+        height: 40px;
+        padding: 5px 10px;
+        background: rgb(37, 37, 126);
+        color: #fff;
+        margin-left: 30px;
+        border-radius: 8px;
+    }
+
+    .answer {
+        width: 80vw;
+        border: 2px solid black;
+        border-radius: 8px;
+        margin-top: 20px;
+        padding: 10px 20px;
+        min-height: 50px;
+        max-height: 3000px; /* Adjustable maximum */
+        resize: none; /* Prevent manual resizing */
+        overflow: hidden; /* Hide scrollbars */
+        &:focus {
+            border: 2px solid black !important;
+            box-shadow: none;
+        }
+    }
+
+    .table-container {
+        max-height: 300px; /* Set the height of the scrollable area */
+        overflow-y: auto;  /* Enable vertical scrolling */
+        border: 1px solid black;
+        margin-bottom: 10px;
+        border-left-width: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+        margin-bottom: -15px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid black;
+        background: #fff;
+    }
+
+    thead th {
+        position: sticky;
+        top: -3px;
+        background: #d1565f;
+        height: 40px; /* Background color for the sticky header */
+        z-index: 2;
+        color: #fff !important;
+        border: 1px solid black;
+    }
+
+    tbody tr:hover {
+        background-color: #fff; /* Highlight on hover */
+    }
+
+      /* Customize scrollbar */
+    .table-container::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+}

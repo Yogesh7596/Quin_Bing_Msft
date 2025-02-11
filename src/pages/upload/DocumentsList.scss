@@ -1,0 +1,328 @@
+/* ############### BOOTSTRAP FRAMEWORK ############### */
+@import "../../variables.scss";
+
+.modal-header {
+  padding-left: 1.4rem;
+  padding-top: 1.4rem;
+  padding-bottom: 0.4rem;
+  width: 100%;
+}
+
+.crossicon {
+  color: black !important;
+  font-size: large;
+  cursor: pointer;
+}
+
+.collapse-button {
+  border: 2px solid#5F7CC9 !important;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 14px;
+  background: #5F7CC9;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-bottom: 10px;
+}
+
+.choose-file {
+  font: normal normal bold 16px Helvetica, sans-serif;
+  letter-spacing: -0.32px;
+  color: #262135;
+}
+.document-section {
+  max-height: 90vh;
+  width: 100vw;
+  max-width: 100vw;
+  overflow: auto;
+  padding: 10px 20px 50px 20px;
+  min-height: 90vh;
+  .csv-column {
+    margin-right: 20px;
+    max-width: 15vw;
+  }
+  
+  .csv-data {
+    .react-bootstrap-table {
+      max-width: 85vw;
+      over-flow: auto !important;
+    }
+  }
+}
+
+.document-upload-section {
+  max-height: 90vh;
+  width: 75vw;
+  // max-width: 75vw;
+  overflow: auto;
+  padding: 10px 20px 50px 20px;
+  min-height: 90vh;
+  .csv-column {
+    margin-right: 20px;
+    max-width: 15vw;
+  }
+  
+  .csv-data {
+    .react-bootstrap-table {
+      max-width: 55vw;
+      over-flow: auto !important;
+    }
+  }
+}
+
+.serach-cls {
+  width: 200px;
+  padding: 0 !important;
+  .form-control {
+    width: 200px !important;
+  }
+  .fa-search-icon {
+    top: 15px;
+    right: 10px;
+  }
+}
+
+.upload-section {
+  .react-bootstrap-table {
+    max-width: 320px;
+    overflow: auto;
+  }
+}
+
+.document-section, .document-upload-section {
+  .react-bootstrap-table {
+    margin-top: 5px;
+    table {
+      bottom: 0;
+    }
+    td {
+      padding: 2px 10px !important;
+    }
+    th {
+      padding:10px !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+    }
+    td {
+      font-size: 12px !important;
+    }
+  }
+}
+
+.table-header-fixed th {
+  position: sticky;
+  top: -1px;
+  z-index: 1;
+  color: #3c59ff !important; 
+  background-color: lavender !important;
+}
+
+.documents {
+  .react-bootstrap-table {
+    border-radius: 0 !important;
+    max-width: 50vw;
+    max-height: 200px !important;
+    overflow: auto;
+    table {
+      margin-bottom: 0 !important;
+    }
+    th, td {
+      padding: 10px 10px !important;
+      border: 1px solid lavender;
+    }
+    th {
+      font-size: 12px !important;
+      border-radius: 0 !important;
+    }
+    td {
+      font-size: 11px !important;
+    }
+    &::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+  }
+}
+.documents-list {
+  .react-bootstrap-table {
+    table{
+      margin-top: 20px;
+    }
+    td, th {
+      align-items: center;
+      padding: 5px 2px !important;
+      .file-name {
+        background: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        padding: 7px;
+        color: black;
+        font-size: 12px;
+        max-width: 220px;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+  .react-bootstrap-table-pagination {
+    .col-md-6 {
+      display: flex;
+      flex-direction: column;
+    }
+    .dropdown-toggle {
+      padding: 5px !important;
+      font-size: 12px !important;
+    }
+    .react-bootstrap-table-pagination-total{
+      font-size: 12px !important;
+    } 
+    .react-bootstrap-table-pagination-list {
+      a{
+        padding: 5px 6px !important;
+        font-size: 10px !important;
+      }
+    }
+  }
+}
+
+.selected-file {
+  background-color: #1C0202;
+}
+
+.csv-column-with-data {
+  padding: 15px;
+  max-height: 50vh;
+  overflow-y: auto;
+  background: white;
+  box-shadow: 5px 0 10px rgba(0, 0, 0, 0.3);;
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+}
+
+.popover {
+  width: 500px;
+  .popover-body {
+    padding: 5px 0 !important;
+    height: max-content;
+    table{
+      margin-top: 10px;
+      border: none;
+      box-shadow: none;
+    td {
+      max-width: 180px;
+      border: 1px solid lightgray;
+    }
+    tr {
+      td::first-child{
+        width: 150px;
+      }
+    }
+  }
+  }
+}
+
+.modalTitle {
+  font: normal normal bold 20px/16px Helvetica, sans-serif !important;
+  letter-spacing: 0px !important;
+  color: #1C0202 !important;
+  margin: 0.125rem 1rem 1rem 0;
+}
+
+.btn-close {
+  margin-bottom: 0.4rem !important;
+}
+
+.overflowcls {
+  overflow: auto;
+  height: auto;
+  max-height: 500px;
+  margin: 1rem;
+  padding: 0;
+}
+
+.preview-modal {
+  width: 70vw !important;
+  margin: 0 auto !important;
+  position: absolute;
+  max-width: 100vw;
+  .modal-content {
+    margin: 7rem 0 0 15vw;
+  }
+}
+
+.previewlabelcls {
+  font: normal normal normal 12px Helvetica, sans-serif !important;
+  font-weight: bold !important;
+  margin-right: 1rem;
+}
+
+.previewtext {
+  font: normal normal normal 12px Helvetica, sans-serif !important;
+  font-weight: 500 !important;
+}
+
+.appendlabelcls {
+  width: 100%;
+  position: relative;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.appendtextcls {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.preview {
+  table {
+    width: auto;
+    margin: 1rem auto !important;
+
+    tr {
+      th {
+        padding: 0.5rem !important;
+      }
+
+      td {
+        font: normal normal normal 12px/14px Helvetica, sans-serif !important;
+        letter-spacing: 0px !important;
+        color: #262135 !important;
+        padding: 0.5rem !important;
+      }
+    }
+
+  }
+}
+
+.modal-backdrop {
+  background-color: rgb(182, 91, 95);
+}
+
+.documentheader {
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.documentstable {
+  padding: 0 !important;
+}
+
+@media only screen and (max-width: 768px){
+  .documentheader {
+    flex-direction: column;
+    align-items: start;
+    padding: 0;
+  }
+}
+
+
+
+
+
+
+
