@@ -4,7 +4,7 @@ from insight12 import SQLQuery
 import streamlit as st
 import os
 import pypyodbc as odbc
-import pyodbc
+# import pyodbc
 import pandas as pd
 import time
 import openai
