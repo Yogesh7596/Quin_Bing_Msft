@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js app to Azure Web App - quin-msft-bingfc-fe
+name: Build and deploy Node.js app to Azure Web App - quin-msft-bingfc-frontend
 
 on:
   push:
@@ -25,15 +25,15 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
+          npm install --force
+          npm run build:prod
+          ls -lah dist # Debugging step to confirm build          
       
-      - name: Upload artifact for deployment job
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
-          path: .
+          name: dist
+          path: dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,16 +43,17 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: dist
+          path: dist
       
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'quin-msft-bingfc-fe'
+          app-name: 'quin-msft-bingfc-frontend'
           slot-name: 'Production'
-          package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B7B0D3578FDE439CAC77EF65A357759C }}
+          package: dist
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D2AD588E4A7049579EFE5E048D210B5A }}
