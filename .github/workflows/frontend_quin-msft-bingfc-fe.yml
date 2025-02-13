@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js app to Azure Web App - quin-msft-bingfc-frontend
+name: Build and deploy Node.js app to Azure Web App - quin-msft-bingfc-fe
 
 on:
   push:
@@ -51,7 +51,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'quin-msft-bingfc-frontend'
+          app-name: 'quin-msft-bingfc-fe'
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D2AD588E4A7049579EFE5E048D210B5A }}
