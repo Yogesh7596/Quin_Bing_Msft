@@ -25,15 +25,15 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          npm install --force
-          npm run build:prod
-          
+          npm install
+          npm run build --if-present
+          npm run test --if-present
       
-      - name: Upload artifact
+      - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: dist
+          name: node-app
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,11 +43,10 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     
     steps:
-      - name: Download artifact
+      - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: dist
-          path: dist
+          name: node-app
       
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
@@ -56,4 +55,4 @@ jobs:
           app-name: 'quin-msft-bingfc-frontend'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D2AD588E4A7049579EFE5E048D210B5A }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9766BFB79BB54225A94AFC843E83B752 }}
