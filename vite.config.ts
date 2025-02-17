@@ -17,10 +17,21 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: './dist/static', 
+    emptyOutDir: true,
+    sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: () => 'everything.js' // Forces all into one bundle
-      }
-    }
-  }
+        manualChunks: (id) => {
+          if (id.includes('@fluentui/react-icons')) {
+            return 'fluentui-icons';
+          } else if (id.includes('@fluentui/react')) {
+            return 'fluentui-react';
+          } else if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
 });
