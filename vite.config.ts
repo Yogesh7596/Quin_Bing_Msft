@@ -17,23 +17,10 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-    sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (id.includes('@fluentui/react-icons')) {
-            return 'fluentui-icons';
-          } else if (id.includes('@fluentui/react')) {
-            return 'fluentui-react';
-          } else if (id.includes('node_modules')) {
-            return 'vendor';
-          } else if  (id.includes('@fluentui/react-window-provider')) {
-            return 'fluent-ui'; 
-          }
-        },
-      },
-    },
-  },
+        manualChunks: () => 'everything.js' // Forces all into one bundle
+      }
+    }
+  }
 });
