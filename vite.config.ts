@@ -29,6 +29,8 @@ export default defineConfig({
             return 'fluentui-react';
           } else if (id.includes('node_modules')) {
             return 'vendor';
+          } else if  (id.includes('@fluentui/react-window-provider')) {
+            return 'fluent-ui'; 
           }
         },
       },
