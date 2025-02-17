@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'quin-msft-bingfc-frontend'
           slot-name: 'Production'
-          package: dist
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_900BE12693054B0182078C0C1035CFBB }}
