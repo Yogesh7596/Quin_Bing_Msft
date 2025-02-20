@@ -21,7 +21,6 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     rollupOptions: {
-      external: (id) => false,
       output: {
         manualChunks: (id) => {
           if (id.includes('@fluentui/react-icons')) {
@@ -34,14 +33,5 @@ export default defineConfig({
         },
       },
     },
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom', '@fluentui/react'],
-    esbuildOptions: {
-      keepNames: true, // Prevents React component names from being removed
-    },
-  },
-  define: {
-    'process.env.NODE_ENV': '"production"', // Ensures React runs in production mode
   },
 });
