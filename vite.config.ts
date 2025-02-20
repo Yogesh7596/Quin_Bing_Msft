@@ -21,7 +21,7 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     rollupOptions: {
-      external: [],
+      external: (id) => false,
       output: {
         manualChunks: (id) => {
           if (id.includes('@fluentui/react-icons')) {
