@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: .
+          path: dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -46,6 +46,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
+          path: dist
       
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
@@ -53,5 +54,5 @@ jobs:
         with:
           app-name: 'quin-msft-bingfc-fe'
           slot-name: 'Production'
-          package: .
+          package: dist
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D2AD588E4A7049579EFE5E048D210B5A }}
