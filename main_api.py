@@ -79,8 +79,8 @@ async def get_table_schema(request: Request):
 @app.get("/get_tables_data")
 async def get_data(database: str = None, tables: str=None):
     tables_list = tables.split(',') if tables else []
-    connection_string = config_data.get('odbc_connection_string', '')
-    #connection_string = os.getenv('connection_string')
+    # connection_string = config_data.get('odbc_connection_string', '')
+    connection_string = os.getenv('connection_string')
     conn = odbc.connect(connection_string)
     cursor = conn.cursor()
 
