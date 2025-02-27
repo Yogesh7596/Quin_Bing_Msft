@@ -421,7 +421,19 @@ const SqlDatabaseQuery = () => {
                     setQuestion={setQuestion} />
                 <button
                     className='generate-insights-button'
-                    style={{ marginRight: '20px', background: "gray !important" }}
+                    style={{ marginRight: '20px', 
+                            background: "gray !important",
+                            padding: '10px 15px',
+                            fontSize: '14px',
+                            minWidth: '150px', 
+                            maxWidth: '200px',
+                            whiteSpace: 'nowrap', 
+                            overflow: 'visible', 
+                            textOverflow: 'clip', 
+                            display: 'inline-flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                           }}
                     onClick={getAzureInsightsRequest}
                 >Generate Insights</button>
             </div>
